@@ -1,0 +1,58 @@
+<html lang="en">
+  <head> 
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://apis.google.com/js/platform.js?onload=init" async defer></script> 
+  </head>
+  <body> 
+    <button id="google-plus-button">Google+ Sign In</button>
+    <script type="text/javascript">
+      function init() { 
+
+          gapi.load('auth2', function () {
+            var auth2;
+
+            auth2 = gapi.auth2.init({
+                client_id: "452819073125-7hprqcmeb4fhd8ki149ui4crm1o1e5ef.apps.googleusercontent.com",
+                scope: 'profile email',
+                plugin_name: 'streamy'
+            });
+
+            auth2.then(function () {
+                var button = document.getElementById("google-plus-button");
+                console.log("User is signed-in in Google+ platform?", auth2.isSignedIn.get() ? "Yes" : "No");
+
+                auth2.attachClickHandler(button, {}, function (googleUser) { 
+
+                  var authResponse = googleUser.getAuthResponse();
+                  
+                  // console.log(authResponse); 
+                  var google = {
+                        "google_prof_details" : authResponse
+                    }
+                  console.log(google)
+                  axios.post('http://localhost:8000/api/v1/get_google_details/',google)
+                  .then(function (response) {
+                    console.log(response);
+                  })
+                  .catch(function (error) {
+                    console.log(error);
+                  });
+
+                    // $.post("http://localhost:8000/api/v1/get_google_details/", 
+                    //   {
+                    //     "google_prof_details" : googleUser
+                    //   },
+                    //   function(data, status) {
+                    //       if(status === "success") {
+                    //           console.log("Post successfully created!")
+                    //       }
+                    //   },
+                    //   "json");
+              });
+            });
+          });
+      }
+      </script>
+    
+  </body>
+</html>
