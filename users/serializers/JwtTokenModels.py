@@ -4,7 +4,6 @@ from users.models.JwtTokwnModels import OutstandingToken
 
 
 class OutstandingTokenSerializers(serializers.ModelSerializer):
-    user = UsersModelSerailizers()
     class Meta: 
         model = OutstandingToken
         fields = "__all__"

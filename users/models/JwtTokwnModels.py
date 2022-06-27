@@ -1,12 +1,10 @@
-from djongo import models
-from users.models.Users import Users
+from djongo import models 
 
 
 class OutstandingToken(models.Model):
     _id = models.ObjectIdField()
-    user = models.EmbeddedField(
-        model_container= Users
-    )
+    
+    user_id = models.CharField(max_length=200,blank=False,null=False)
 
     jti = models.CharField(unique=True, max_length=255)
     token = models.TextField()
@@ -17,18 +15,19 @@ class OutstandingToken(models.Model):
     class Meta:  
         abstract = False
         db_table = "OutstandingToken"
-        ordering = ("user",)
+        ordering = ("created_at",)
 
     def __str__(self):
         return "Token for {} ({})".format(
-            self.user,
+            self.user_id,
             self.jti,
         )
 
 
 class BlacklistedToken(models.Model):
     _id = models.ObjectIdField()
-    token = models.EmbeddedField(model_container= OutstandingToken)
+
+    token = models.CharField(max_length=100,blank=False,null=False)
 
     blacklisted_at = models.DateTimeField(auto_now_add=True)
 
@@ -37,4 +36,4 @@ class BlacklistedToken(models.Model):
         db_table = "BlacklistedToken"
 
     def __str__(self):
-        return f"Blacklisted token for {self.token.user}"
+        return f"Blacklisted token for {self.token}"

@@ -4,11 +4,13 @@ from .serializers.UsersSerializers import UsersModelSerailizers
 from djongo.models.fields import ObjectId
 from django.shortcuts import get_object_or_404, render
 from rest_framework.exceptions import APIException
+from rest_framework_simplejwt.settings import api_settings
 
 
 from .auth_util_serializers import LoginSerializer,LogoutSerializer,ResetPasswordEmailSentSerializers,ResetPasswordSerializers,RegisterSerializer
 from rest_framework import status,generics
-from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+from rest_framework_simplejwt.exceptions import InvalidToken
+from .JWTConfig.CustiomJwt import CustomRefreshToken
 
 
 from django.urls import reverse_lazy
@@ -33,6 +35,7 @@ from rest_framework.authentication import get_authorization_header
 
 # from .CustomJwtAuth import CustomJwtAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.tokens import Token
 
 from django.contrib.auth import get_user_model
 
@@ -93,7 +96,7 @@ class RegisterView(generics.GenericAPIView):
         serializer.save()
         user_data = serializer.data
         user = Users.objects.get(email=user_data['email'])
-        token = RefreshToken.for_user(user).access_token
+
         # current_site = get_current_site(request).domain
         # relativeLink = reverse('email-verify')
         # absurl = 'http://'+current_site+relativeLink+"?token="+str(token)
@@ -114,7 +117,6 @@ class LogInView(APIView):
         body = json.loads(body_unicode) 
         serializers_data = self.serializer_class(data=body)
         serializers_data.is_valid(raise_exception=True)
-        # print(serializers_data.validated_data)
  
         return Response(serializers_data.data,status=status.HTTP_200_OK)
 
@@ -123,11 +125,14 @@ class LogOutView(APIView):
     def post(self,request,format=None):
         serializers_data = self.serializer_class(data=request.data)
         serializers_data.is_valid(raise_exception=True)
+
+         
         try : 
-            token = RefreshToken(serializers_data.data)
+            token = CustomRefreshToken(token = serializers_data.data.get("refresh"))
             token.blacklist()
-        except TokenError:
-            msg = 'Successfully logged out'
+            msg = "Token Successfully blacklisted and logged out" 
+        except :
+            msg = 'There is an error with token. Error : '+InvalidToken.default_detail
         return Response(msg,status=status.HTTP_200_OK)
 
 # ########## Password Reset #############

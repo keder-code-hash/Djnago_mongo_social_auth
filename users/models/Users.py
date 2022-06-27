@@ -11,6 +11,8 @@ from django.utils import timezone
 from django.utils.deconstruct import deconstructible
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from ..JWTConfig.CustiomJwt import CustomRefreshToken
+
 @deconstructible
 class UseremailValidator(validators.EmailValidator):
     message = _(
@@ -96,7 +98,6 @@ class Users(BaseModel,AbstractUser):
     groups = None
     user_permissions = None
     
-
     address = models.ArrayField(model_container=AddressModel)
     audits_data = models.EmbeddedField(model_container=AuditModel)
 
@@ -110,6 +111,9 @@ class Users(BaseModel,AbstractUser):
     def __str__(self):
         return self.email
 
+    def get_id(self):
+        return self._id
+
     def has_perm(self, perm, obj=None):
         return self.is_staff
 
@@ -117,7 +121,8 @@ class Users(BaseModel,AbstractUser):
         return True
 
     def tokens(self):
-        refresh = RefreshToken.for_user(self)
+        refresh = CustomRefreshToken.for_user(self)
+
         return {
             'refresh': str(refresh),
             'access': str(refresh.access_token)

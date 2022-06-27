@@ -2,16 +2,11 @@ from .models.Users import Users
 from rest_framework import serializers
 from django.contrib import auth
 from rest_framework.exceptions import AuthenticationFailed
-from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from django.contrib.auth import password_validation 
 from django.utils.translation import gettext_lazy as _
 
 from .serializers.UsersSerializers import UsersModelSerailizers
 
-
-from users.models.JwtTokwnModels import OutstandingToken
-from users.serializers.JwtTokenModels import OutstandingTokenSerializers
-from datetime import datetime
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
@@ -55,7 +50,7 @@ class LoginSerializer(serializers.Serializer):
         email = attrs.get('email', '')
         password = attrs.get('password', '')
         filtered_user_by_email = Users.objects.filter(email=email)
-        print(email)
+        # print(email)
         # user = auth.authenticate(username=username, password=password)
 
         user = auth.authenticate(email=email, password=password)
@@ -72,18 +67,11 @@ class LoginSerializer(serializers.Serializer):
             raise AuthenticationFailed('Account disabled, contact admin')
         # if not user.is_verified:
         #     raise AuthenticationFailed('Email is not verified')
-        tk_user=Users.objects.filter(email__iexact=email).values()[0]
-        data = {
-                "user" : tk_user,"jti" : 'qwesdx1q23ws21zxs1xqws',"token" : 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjU2Mjc0ODc4LCJpYXQiOjE2NTYyNzQ1NzgsImp0aSI6ImIxM2RlOWUxZDNmOTQ3YTQ5YzBhNGI5MWRhYTliYmI4IiwiZW1haWwiOiJrZWRlckBnbWFpbC5jb20ifQ.QBXxJ_XjmFIClxEPYhX-e4EWrvT_Kh8PaVYdE9QdJDE',"created_at": datetime.now(), "expires_at": datetime.now()
-        }
-        ost = OutstandingTokenSerializers(data=data)
-        ost.is_valid(raise_exception=True)
-        ost.save()
 
         return { 
             'email': user.email,
             'user':user,
-            'tokens': user.tokens
+            # 'tokens': user.tokens
         }
 
 class LogoutSerializer(serializers.Serializer):
