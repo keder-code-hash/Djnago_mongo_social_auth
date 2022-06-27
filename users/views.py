@@ -149,9 +149,7 @@ def send_mail(subject_template_name, email_template_name,
             )
         mail.content_subtype = "html"
         mail.send() 
-
-# # just send the password reset email from django
-# # contains the link 
+ 
 class SendResetPassEmail(APIView):
     serializer_class = ResetPasswordEmailSentSerializers
     def post(self,request):
@@ -225,3 +223,9 @@ class ResetPassTODB(APIView):
         serializer.save(user)
         
         return Response(UsersModelSerailizers(self.get_user(uidb64)).data, status = status.HTTP_200_OK)
+
+##### social authentication using google#######
+
+
+
+#################
